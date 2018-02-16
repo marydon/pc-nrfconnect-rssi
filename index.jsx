@@ -111,6 +111,9 @@ export default {
         disabled: state.app.port === null,
         ...props,
     }),
+    decorateSerialPortSelector: SerialPortSelector => (
+        props => <SerialPortSelector {...props} filter={() => true} />
+    ),
     mapSerialPortSelectorState: (state, props) => ({
         portIndicatorStatus: (state.app.port !== null) ? 'on' : 'off',
         ...props,
@@ -121,10 +124,7 @@ export default {
         }
         if (action.type === 'SERIAL_PORT_SELECTED') {
             const { port } = action;
-            store.dispatch(FirmwareActions.validateFirmware(port.serialNumber, {
-                onValid: () => store.dispatch(RssiActions.open(port)),
-                onInvalid: () => store.dispatch({ type: 'FIRMWARE_DIALOG_SHOW', port }),
-            }));
+            store.dispatch(RssiActions.open(port));
         }
         if (action.type === 'SERIAL_PORT_DESELECTED') {
             store.dispatch(RssiActions.close());
