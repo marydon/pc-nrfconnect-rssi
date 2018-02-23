@@ -112,7 +112,7 @@ export default {
         ...props,
     }),
     decorateSerialPortSelector: SerialPortSelector => (
-        props => <SerialPortSelector {...props} filter={() => true} />
+        props => <SerialPortSelector {...props} filter={port => port.comName.includes('ACM')} />
     ),
     mapSerialPortSelectorState: (state, props) => ({
         portIndicatorStatus: (state.app.port !== null) ? 'on' : 'off',
