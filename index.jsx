@@ -39,7 +39,9 @@
 import React from 'react';
 import { logger, getAppDir } from 'nrfconnect/core';
 import path from 'path';
-import Chart from './components/Chart';
+// import Chart from './components/Chart';
+// import Spectrogram from './components/Spectrogram';
+import LabelledSpectrogram from './components/LabelledSpectrogram';
 import ControlPanel from './components/ControlPanel';
 import reduceApp from './reducers/appReducer';
 import * as RssiActions from './actions/rssiActions';
@@ -48,14 +50,17 @@ import './resources/css/index.less';
 const yRange = {
     min: -110,
     max: -20,
-    map: y => -(yRange.min + yRange.max) - y,
+//     map: y => -(yRange.min + yRange.max) - y,
+    map: y => -y,
 };
 
 export default {
     decorateMainView: MainView => (
+//                 <Spectrogram {...props} yMin={yRange.min} yMax={yRange.max} />
+//                 <Chart {...props} yMin={yRange.min} yMax={yRange.max} />
         props => (
             <MainView>
-                <Chart {...props} yMin={yRange.min} yMax={yRange.max} />
+                <LabelledSpectrogram {...props} />
             </MainView>
         )
     ),
@@ -124,6 +129,7 @@ export default {
         switch (action.type) {
             case 'DEVICE_SELECTED':
                 logger.info(`Validating firmware for device with s/n ${action.device.serialNumber}`);
+                store.dispatch(RssiActions.close());
                 break;
 
             case 'DEVICE_DESELECTED':

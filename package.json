@@ -37,7 +37,10 @@
     "react-bootstrap-slider": "2.1.4",
     "react-chartjs-2": "2.7.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "d3-scale": "^2.1.0",
+    "react-d3-components": "^0.9.1"
+  },
   "engines": {
     "nrfconnect": "^2.4.0"
   }
