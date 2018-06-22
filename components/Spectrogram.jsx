@@ -46,6 +46,20 @@ export default class Spectrogram extends React.Component {
         this.dataHeight = 81;
     }
 
+    componentDidMount() {
+        // Trigger one column render every 100msec
+        this.interval = setInterval(this.drawLine.bind(this), 50);
+
+//         console.log('Canvas update started.');
+    }
+
+    componentWillUnmount() {
+        // Stop updating the spectrogram
+        clearInterval(this.interval);
+
+//         console.log('Canvas update stopped.');
+    }
+
     setCanvasRef(canvas) {
         if (!canvas) { return; }
 
@@ -55,21 +69,21 @@ export default class Spectrogram extends React.Component {
         // Height is equal to the number of channels (frequency ranges) to
         // display. This is the amount of pixels addressable inside the canvas,
         // not the visible size of the canvas (which will be larger due to CSS)
-        canvas.height = this.dataHeight;
+        canvas.height = this.dataHeight;    /* eslint no-param-reassign: 0 */
 
         // Width is equal to the amount of data points to keep in time.
         // Same as the height, it's not the visible size of the canvas.
-        canvas.width = this.dataWidth;
+        canvas.width = this.dataWidth;      /* eslint no-param-reassign: 0 */
 
-        this._ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d');
 
-        this._ctx.fillStyle = 'black';
-        this._ctx.fillRect(0, 0, this.dataWidth, this.dataHeight);
+        this.ctx.fillStyle = 'black';
+        this.ctx.fillRect(0, 0, this.dataWidth, this.dataHeight);
 
 
-        if (this._canvas) {
+        if (this.canvas) {
             // If a previous canvas already exists, copy pixels over.
-            this._ctx.drawImage(this._canvas,
+            this.ctx.drawImage(this.canvas,
                                 0, 0,
                                 this.dataWidth - 1, this.dataHeight,
                                 0, 0,
@@ -77,47 +91,22 @@ export default class Spectrogram extends React.Component {
         }
 
         // Store the reference to the canvas itself
-        this._canvas = canvas;
-
-//         console.log('Canvas initialized');
-    }
-
-    componentDidMount() {
-        // Trigger one column render every 100msec
-        this._interval = setInterval(this.drawLine.bind(this), 50);
-
-//         console.log('Canvas update started.');
-    }
-
-    componentWillUnmount() {
-        // Stop updating the spectrogram
-        clearInterval(this._interval);
-
-//         console.log('Canvas update stopped.');
+        this.canvas = canvas;
     }
 
     drawLine() {
-        if (this._canvas && this.props.rssi) {
-//             console.log('Drawing one column');
-            // Scroll everything one pixel to the left
-//             this._ctx.drawImage(this._canvas,
-//                                 0, 0,
-//                                 this.dataWidth - 1, this.dataHeight,
-//                                 1, 0,
-//                                 this.dataWidth - 1, this.dataHeight);
-            this._ctx.putImageData(
-                this._ctx.getImageData(1, 0, this.dataWidth - 1, this.dataHeight),
+        if (this.canvas && this.props.rssi) {
+            this.ctx.putImageData(
+                this.ctx.getImageData(1, 0, this.dataWidth - 1, this.dataHeight),
                 0, 0,
             );
 
-            const min = this.props.yMin,
-                max = this.props.yMax;
-//             const max = -127, min = -20;
+            const min = this.props.yMin;
+            const max = this.props.yMax;
 //             const max = -70, min = -117;
 
-
             // Draw one pixel per value of the "rssi" prop in the rigthmost column
-            for (let i = 0; i < this.dataHeight; i++) {
+            for (let i = 0; i < this.dataHeight; i += 1) {
                 // The value received from the firmware is just the value of the
                 // RADIO.RSSISAMPLE hardware register - a positive 7-bit integer,
                 // representing the signal strenght in *negative* dBm.
@@ -127,54 +116,58 @@ export default class Spectrogram extends React.Component {
                 const value = this.props.rssi[i];
 
                 // Normalize into the 0-1 range
-                let lightness = (value - min) / (max - min);
+                const lightness = (value - min) / (max - min);
 
                 // Square it, so that high values seem higher
-                lightness **= 2;
+//                 lightness **= 2;
 
 
-                const historicMaxValue = this.props.rssi[i];
+//                 const historicMaxValue = this.props.rssi[i];
 
                 // Normalize into the 0-1 range
-                const historixMaxLightness = (historicMaxValue - min) / (max - min);
+//                 const historicMaxLightness = (historicMaxValue - min) / (max - min);
 
-                this._ctx.fillStyle = `hsl(0, 0%, ${lightness * 100}%)`;
-//                 this._ctx.fillStyle = 'hsl(0, histo%, ' + lightness * 100 + '%)';
-//                 this._ctx.fillStyle = 'hsl(0, ' + lightness * 100 + '%, ' + historixMaxLightness * 100 +'%)';
-//                 this._ctx.fillStyle = 'hsl(0, ' + (historixMaxLightness) * 30 + '%, ' + lightness * 100 +'%)';
-                this._ctx.fillRect(this.dataWidth - 1, i, 1, 1);
+                this.ctx.fillStyle = `hsl(0, 0%, ${lightness * 100}%)`;
+//                 this.ctx.fillStyle = 'hsl(0, histo%, ' + lightness * 100 + '%)';
+//                 this.ctx.fillStyle = 'hsl(0, ' + lightness * 100 + '%, ' +
+//                   historicMaxLightness * 100 +'%)';
+//                 this.ctx.fillStyle = 'hsl(0, ' + (historicMaxLightness) * 30 +
+//                 '%, ' + lightness * 100 +'%)';
+                this.ctx.fillRect(this.dataWidth - 1, i, 1, 1);
             }
         }
     }
 
     render() {
-        if (this.rendered) {
-            return this.rendered;
+        if (!this.rendered) {
+            this.rendered = (<canvas
+                ref={this.setCanvasRef.bind(this)}
+                style={this.props.style}
+            />);
         }
 
-        return this.rendered = (<canvas
-            ref={this.setCanvasRef.bind(this)}
-            style={this.props.style}
-        />);
+        return this.rendered;
     }
 }
 
 
 Spectrogram.propTypes = {
     rssi: PropTypes.arrayOf(Number),
-    rssiMax: PropTypes.arrayOf(Number),
-    animationDuration: PropTypes.number,
+//     rssiMax: PropTypes.arrayOf(Number),
+//     animationDuration: PropTypes.number,
     yMin: PropTypes.number,
     yMax: PropTypes.number,
-    separateFrequencies: PropTypes.bool,
+//     separateFrequencies: PropTypes.bool,
+    style: PropTypes.shape({}),
 };
 
 Spectrogram.defaultProps = {
     rssi: [],
-    rssiMax: [],
-    animationDuration: 500,
+//     rssiMax: [],
+//     animationDuration: 500,
     yMin: -100,
     yMax: -50,
-    separateFrequencies: false,
+//     separateFrequencies: false,
+    style: {},
 };
 

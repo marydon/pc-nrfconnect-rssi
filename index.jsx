@@ -50,7 +50,6 @@ import './resources/css/index.less';
 const yRange = {
     min: -110,
     max: -20,
-//     map: y => -(yRange.min + yRange.max) - y,
     map: y => -y,
 };
 
