@@ -101,9 +101,9 @@ export default class Spectrogram extends React.Component {
                 0, 0,
             );
 
-            const min = this.props.yMin;
-            const max = this.props.yMax;
-//             const max = -70, min = -117;
+//             const min = this.props.yMin;
+//             const max = this.props.yMax;
+            const max = -60, min = -90;
 
             // Draw one pixel per value of the "rssi" prop in the rigthmost column
             for (let i = 0; i < this.dataHeight; i += 1) {
